@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek与Siri集成教程</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #4CAF50;
+        }
+        h3 {
+            color: #FF6347;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            color: #333;
+            overflow-x: auto;
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #fff;
+            border-left: 5px solid #4CAF50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .highlight {
+            color: #FF4500;
+        }
+        .code {
+            color: #D2691E;
+        }
+        .important {
+            color: #FF1493;
+        }
+        .note {
+            background-color: #FFFFE0;
+            padding: 10px;
+            border-left: 5px solid #FFD700;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>DeepSeek 与 Siri 集成教程</h1>
+    <p>将 <span class="highlight">Siri</span> 和 <span class="highlight">DeepSeek</span> 结合成 AI 助手，可以通过 iOS 的「快捷指令」实现，核心思路是让 Siri 接收语音指令，调用 DeepSeek API 返回结果并语音播报。</p>
+
+    <div class="step">
+        <h2>第一步：准备工作</h2>
+        <ol>
+            <li><strong>获取 DeepSeek API 权限：</strong>
+                <p>登录 DeepSeek 官网（或开发者平台），注册账号并获取 <span class="important">API Key</span> 和 API 接口地址（例如 <code>https://api.deepseek.com/v1/chat/completions</code>）。确保 API 支持通过 HTTP 请求调用（通常需要 <code>POST</code> 方法 + JSON 数据）。</p>
+            </li>
+            <li><strong>设备要求：</strong>
+                <p>iPhone/iPad 升级到最新 iOS/iPadOS 系统，安装「快捷指令」App（系统自带）。</p>
+            </li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>第二步：创建快捷指令</h2>
+        <ol>
+            <li><strong>新建快捷指令：</strong>
+                <p>打开「快捷指令」App → 点击右上角 <span class="highlight">+</span> → 创建新快捷指令。</p>
+            </li>
+            <li><strong>添加 Siri 语音触发：</strong>
+                <p>点击顶部标题 → 选择「添加到 Siri」→ 录制唤醒词（例如“嘿 Siri，咨询 DeepSeek”）。</p>
+            </li>
+            <li><strong>核心操作步骤：</strong>
+                <ul>
+                    <li><strong>获取用户输入：</strong>
+                        <pre class="code">- 操作：添加「文本」块 → 输入 {"model": "deepseek-chat", "messages": [{"role": "user", "content": "你的问题"}]}。</pre>
+                        <p>修改：将 <span class="highlight">"你的问题"</span> 替换为「快捷指令变量」<code>问：</code>（后续替换为 Siri 的语音输入）。</p>
+                    </li>
+                    <li><strong>调用 DeepSeek API：</strong>
+                        <pre class="code">- 操作：添加「获取URL内容」块 → 输入 API 地址（如 https://api.deepseek.com/v1/chat/completions）。</pre>
+                        <p>方法：选择 <code>POST</code>。请求头：<br>
+                           <span class="highlight">Content-Type</span>: <code>application/json</code><br>
+                           <span class="highlight">Authorization</span>: <code>Bearer [你的API Key]</code><br>
+                           请求体：选择「文本」块的内容。</p>
+                    </li>
+                    <li><strong>解析 API 响应：</strong>
+                        <pre class="code">- 操作：添加「从JSON中获取值」块 → 输入路径 <span class="highlight">choices.0.message.content</span>（提取回复文本）。</pre>
+                        <p>操作：添加「显示结果」或「朗读文本」块 → 用变量传递解析后的内容。</p>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>第三步：关联 Siri 与快捷指令</h2>
+        <ol>
+            <li><strong>测试语音指令：</strong>
+                <p>对 Siri 说出你设置的唤醒词（如“嘿 Siri，咨询 DeepSeek”）。Siri 会提示你输入问题 → 说出问题后，快捷指令会自动调用 DeepSeek API 并返回结果。</p>
+            </li>
+            <li><strong>示例回复：</strong>
+                <p>如果问“今天天气如何？”，DeepSeek 的回复会通过 Siri 朗读或显示在屏幕上。</p>
+            </li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>完整快捷指令配置示例</h2>
+        <pre class="code">
+1. 文本：
+   - 内容：{"model": "deepseek-chat", "messages": [{"role": "user", "content": "问："}]}
+
+2. 获取URL内容：
+   - URL: https://api.deepseek.com/v1/chat/completions
+   - 方法: POST
+   - 请求头:
+     - Authorization: Bearer [你的API Key]
+     - Content-Type: application/json
+   - 请求体: 文本
+
+3. 从JSON中获取值：
+   - 路径: choices.0.message.content
+
+4. 朗读文本：
+   - 输入: 从JSON中获取的值
+        </pre>
+    </div>
+
+    <div class="note">
+        <strong>注意事项：</strong>
+        <ul>
+            <li><strong>API 调用限制：</strong>DeepSeek 可能对免费 API Key 有调用次数限制，需注意用量。</li>
+            <li><strong>隐私安全：</strong>API Key 是敏感信息，不要分享给他人。可在快捷指令中隐藏 Key（通过变量或加密存储）。</li>
+            <li><strong>错误处理：</strong>添加「如果」条件判断 API 是否返回错误（例如状态码非200），并提示用户重试。</li>
+        </ul>
+    </div>
+
+</body>
+</html>
